@@ -7,13 +7,22 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs.j
 import { Plus, Users, Edit, Trash2, Bot, Palette, Sparkles } from 'lucide-react'
 
 function PersonalitiesManager({ personalities, providers, onRefresh }) {
+  const BACKEND_URL = import.meta.env.VITE_APP_BACKEND_URL;
+
+  // Aggiunto controllo per assicurarsi che BACKEND_URL sia definito
+  useEffect(() => {
+    if (!BACKEND_URL) {
+      console.error("VITE_APP_BACKEND_URL is not defined. Please check your .env file.");
+    }
+  }, [BACKEND_URL]);
+
   const [showAddDialog, setShowAddDialog] = useState(false)
   const [editingPersonality, setEditingPersonality] = useState(null)
   const [selectedTemplate, setSelectedTemplate] = useState(null)
 
   const handleAddPersonality = async (personalityData) => {
     try {
-      const response = await fetch('/api/personalities', {
+      const response = await fetch(`${BACKEND_URL}/api/personalities`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -34,7 +43,7 @@ function PersonalitiesManager({ personalities, providers, onRefresh }) {
 
   const handleCreateFromTemplate = async (templateName, providerId, customName) => {
     try {
-      const response = await fetch('/api/personalities/from-template', {
+      const response = await fetch(`${BACKEND_URL}/api/personalities/from-template`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -60,7 +69,7 @@ function PersonalitiesManager({ personalities, providers, onRefresh }) {
   const handleDeletePersonality = async (personalityId) => {
     if (confirm('Sei sicuro di voler eliminare questa personalità?')) {
       try {
-        const response = await fetch(`/api/personalities/${personalityId}`, {
+        const response = await fetch(`${BACKEND_URL}/api/personalities/${personalityId}`, {
           method: 'DELETE'
         })
         const data = await response.json()
@@ -232,7 +241,7 @@ function PersonalitiesManager({ personalities, providers, onRefresh }) {
               providers={providers}
               onSubmit={async (data) => {
                 try {
-                  const response = await fetch(`/api/personalities/${editingPersonality.id}`, {
+                  const response = await fetch(`${BACKEND_URL}/api/personalities/${editingPersonality.id}`, {
                     method: 'PUT',
                     headers: {
                       'Content-Type': 'application/json',
@@ -267,7 +276,7 @@ function TemplateSelector({ providers, onCreateFromTemplate }) {
   const [loading, setLoading] = useState(true)
 
   useState(() => {
-    fetch('/api/personality-templates')
+    fetch(`${BACKEND_URL}/api/personality-templates`)
       .then(res => res.json())
       .then(data => {
         if (data.success) {

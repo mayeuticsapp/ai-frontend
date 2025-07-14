@@ -6,13 +6,21 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Plus, Settings, Trash2, TestTube, CheckCircle, XCircle } from 'lucide-react'
 
 function ProvidersManager({ providers, onRefresh }) {
+  const BACKEND_URL = import.meta.env.VITE_APP_BACKEND_URL;
+
+  // Aggiunto controllo per assicurarsi che BACKEND_URL sia definito
+  useEffect(() => {
+    if (!BACKEND_URL) {
+      console.error("VITE_APP_BACKEND_URL is not defined in ProvidersManager. Please check your .env file.");
+    }
+  }, [BACKEND_URL]);
   const [showAddDialog, setShowAddDialog] = useState(false)
   const [editingProvider, setEditingProvider] = useState(null)
   const [testing, setTesting] = useState(null)
 
   const handleAddProvider = async (providerData) => {
     try {
-      const response = await fetch('/api/providers', {
+      const response = await fetch(`${BACKEND_URL}/api/providers`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -34,7 +42,7 @@ function ProvidersManager({ providers, onRefresh }) {
   const handleTestProvider = async (providerId) => {
     setTesting(providerId)
     try {
-      const response = await fetch(`/api/providers/${providerId}/test`, {
+      const response = await fetch(`${BACKEND_URL}/api/providers/${providerId}/test`, {
         method: 'POST'
       })
       const data = await response.json()
@@ -52,7 +60,7 @@ function ProvidersManager({ providers, onRefresh }) {
   const handleDeleteProvider = async (providerId) => {
     if (confirm('Sei sicuro di voler eliminare questo provider?')) {
       try {
-        const response = await fetch(`/api/providers/${providerId}`, {
+        const response = await fetch(`${BACKEND_URL}/api/providers/${providerId}`, {
           method: 'DELETE'
         })
         const data = await response.json()
@@ -203,7 +211,7 @@ function ProvidersManager({ providers, onRefresh }) {
               provider={editingProvider}
               onSubmit={async (data) => {
                 try {
-                  const response = await fetch(`/api/providers/${editingProvider.id}`, {
+                  const response = await fetch(`${BACKEND_URL}/api/providers/${editingProvider.id}`, {
                     method: 'PUT',
                     headers: {
                       'Content-Type': 'application/json',
