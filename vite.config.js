@@ -12,12 +12,14 @@ export default defineConfig({
     },
   },
   server: {
-    host: true, // Necessario per essere visibile all'esterno del container
+    host: true, // Manteniamo questo per sicurezza
     strictPort: true,
     hmr: {
-      clientPort: 443, // Porta standard per le connessioni sicure (HTTPS)
+      clientPort: 443,
     },
-    // Rimuoviamo 'allowedHosts' perché 'host: true' dovrebbe già gestire questo.
-    // Se l'errore persiste, lo reinseriremo. Proviamo prima la soluzione più pulita.
+    // Aggiungiamo esplicitamente l'host permesso come richiesto dall'errore
+    allowedHosts: [
+      'ai-frontend-iyvt.onrender.com'
+    ]
   }
 })
