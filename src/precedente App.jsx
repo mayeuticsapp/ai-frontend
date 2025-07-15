@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button.jsx'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card.jsx'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs.jsx'
 import { Badge } from '@/components/ui/badge.jsx'
+// import { Separator } from '@/components/ui/separator.jsx' // Rimosso: importato ma non usato
 import { MessageCircle, Bot, Settings, Plus, Play, Users } from 'lucide-react'
 import './App.css'
 
@@ -12,6 +13,9 @@ import PersonalitiesManager from './components/PersonalitiesManager'
 import ConversationViewer from './components/ConversationViewer'
 import ConversationsList from './components/ConversationsList'
 
+// New Conversation Form Component (Assumiamo sia nello stesso file, altrimenti deve essere importato)
+// Se NewConversationForm si trova in un file separato come './components/NewConversationForm',
+// allora l'importazione qui sopra deve essere attiva: import NewConversationForm from './components/NewConversationForm'
 function NewConversationForm({ personalities, onCreateConversation }) {
   const [title, setTitle] = useState('')
   const [topic, setTopic] = useState('')
@@ -129,21 +133,22 @@ function App() {
   const [selectedConversation, setSelectedConversation] = useState(null)
   const [loading, setLoading] = useState(true)
 
-  // API base URL
-  const API_BASE = "https://ai-backend-p4jt.onrender.com/api"
+  // API base URL: ora usa la variabile d'ambiente per il dominio cross-origin
+  const API_BASE = "https://ai-backend-p4jt.onrender.com/api"; // Assicurati che questo sia l'URL corretto del tuo backend
+;
 
   // Funzioni per il fetching dei dati
   const fetchProviders = async () => {
     try {
       const response = await fetch(`${API_BASE}/providers`)
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
+      if (!response.ok) { // Controllo dell'errore HTTP
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
       const data = await response.json()
-      if (data.success) {
+      if (data.success) { // Assumo che la risposta contenga un campo 'success'
         setProviders(data.providers)
       } else {
-        console.error('API Error fetching providers:', data.message || 'Unknown error')
+        console.error('API Error fetching providers:', data.message || 'Unknown error');
       }
     } catch (error) {
       console.error('Error fetching providers:', error)
@@ -153,14 +158,14 @@ function App() {
   const fetchPersonalities = async () => {
     try {
       const response = await fetch(`${API_BASE}/personalities`)
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
+      if (!response.ok) { // Controllo dell'errore HTTP
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
       const data = await response.json()
-      if (data.success) {
+      if (data.success) { // Assumo che la risposta contenga un campo 'success'
         setPersonalities(data.personalities)
       } else {
-        console.error('API Error fetching personalities:', data.message || 'Unknown error')
+        console.error('API Error fetching personalities:', data.message || 'Unknown error');
       }
     } catch (error) {
       console.error('Error fetching personalities:', error)
@@ -170,14 +175,14 @@ function App() {
   const fetchConversations = async () => {
     try {
       const response = await fetch(`${API_BASE}/conversations`)
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
+      if (!response.ok) { // Controllo dell'errore HTTP
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
       const data = await response.json()
-      if (data.success) {
+      if (data.success) { // Assumo che la risposta contenga un campo 'success'
         setConversations(data.conversations)
       } else {
-        console.error('API Error fetching conversations:', data.message || 'Unknown error')
+        console.error('API Error fetching conversations:', data.message || 'Unknown error');
       }
       setLoading(false)
     } catch (error) {
@@ -191,7 +196,7 @@ function App() {
     fetchProviders()
     fetchPersonalities()
     fetchConversations()
-  }, [])
+  }, []) // Array vuoto per eseguire una sola volta al montaggio del componente
 
   const createNewConversation = async (title, topic, participantIds) => {
     try {
@@ -207,16 +212,16 @@ function App() {
         })
       })
       const data = await response.json()
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}, message: ${data.message || 'Unknown error'}`)
+      if (!response.ok) { // Controllo dell'errore HTTP anche per le POST
+        throw new Error(`HTTP error! status: ${response.status}, message: ${data.message || 'Unknown error'}`);
       }
       if (data.success) {
-        await fetchConversations()
-        setSelectedConversation(data.conversation.id)
-        setActiveTab('conversations')
+        await fetchConversations() // Aggiorna la lista delle conversazioni
+        setSelectedConversation(data.conversation.id) // Seleziona la nuova conversazione
+        setActiveTab('conversations') // Torna al tab delle conversazioni
         return data.conversation
       } else {
-        console.error('API Error creating conversation:', data.message || 'Unknown error')
+        console.error('API Error creating conversation:', data.message || 'Unknown error');
       }
     } catch (error) {
       console.error('Error creating conversation:', error)
@@ -360,4 +365,3 @@ function App() {
 }
 
 export default App
-

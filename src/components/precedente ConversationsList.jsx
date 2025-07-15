@@ -131,16 +131,7 @@ function ConversationItem({
   getStatusColor,
   getStatusText
 }) {
-  // Gestione sicura del parsing JSON per participants
-  let participantIds = []
-  try {
-    if (conversation.participants && conversation.participants.trim() !== '') {
-      participantIds = JSON.parse(conversation.participants)
-    }
-  } catch (error) {
-    console.warn('Error parsing participants JSON:', error)
-    participantIds = []
-  }
+  const participantIds = conversation.participants ? JSON.parse(conversation.participants) : []
   
   return (
     <div
