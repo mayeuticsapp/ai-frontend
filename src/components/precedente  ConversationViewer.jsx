@@ -15,9 +15,6 @@ function ConversationViewer({ conversationId, personalities, onRefresh }) {
   const [autoRounds, setAutoRounds] = useState(3)
   const messagesEndRef = useRef(null)
 
-  // API base URL
-  const API_BASE = "https://ai-backend-p4jt.onrender.com/api"
-
   useEffect(() => {
     if (conversationId) {
       fetchConversation()
@@ -35,17 +32,12 @@ function ConversationViewer({ conversationId, personalities, onRefresh }) {
   const fetchConversation = async () => {
     setLoading(true)
     try {
-      const response = await fetch(`${API_BASE}/conversations/${conversationId}`)
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
-      }
+      const response = await fetch(`/api/conversations/${conversationId}`)
       const data = await response.json()
       if (data.success) {
         setConversation(data.conversation)
         setMessages(data.messages)
         setParticipants(data.participants)
-      } else {
-        console.error('API Error fetching conversation:', data.message || 'Unknown error')
       }
     } catch (error) {
       console.error('Error fetching conversation:', error)
@@ -58,7 +50,7 @@ function ConversationViewer({ conversationId, personalities, onRefresh }) {
     
     setSending(true)
     try {
-      const response = await fetch(`${API_BASE}/conversations/${conversationId}/messages`, {
+      const response = await fetch(`/api/conversations/${conversationId}/messages`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -68,15 +60,10 @@ function ConversationViewer({ conversationId, personalities, onRefresh }) {
           sender_type: 'user'
         })
       })
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
-      }
       const data = await response.json()
       if (data.success) {
         setUserMessage('')
         await fetchConversation()
-      } else {
-        console.error('API Error sending message:', data.message || 'Unknown error')
       }
     } catch (error) {
       console.error('Error sending message:', error)
@@ -86,7 +73,7 @@ function ConversationViewer({ conversationId, personalities, onRefresh }) {
 
   const sendAIMessage = async (personalityId, content) => {
     try {
-      const response = await fetch(`${API_BASE}/conversations/${conversationId}/messages`, {
+      const response = await fetch(`/api/conversations/${conversationId}/messages`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -97,14 +84,9 @@ function ConversationViewer({ conversationId, personalities, onRefresh }) {
           sender_type: 'ai'
         })
       })
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
-      }
       const data = await response.json()
       if (data.success) {
         await fetchConversation()
-      } else {
-        console.error('API Error sending AI message:', data.message || 'Unknown error')
       }
     } catch (error) {
       console.error('Error sending AI message:', error)
@@ -114,7 +96,7 @@ function ConversationViewer({ conversationId, personalities, onRefresh }) {
   const startAutoConversation = async () => {
     setAutoMode(true)
     try {
-      const response = await fetch(`${API_BASE}/conversations/${conversationId}/auto-continue`, {
+      const response = await fetch(`/api/conversations/${conversationId}/auto-continue`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -123,14 +105,9 @@ function ConversationViewer({ conversationId, personalities, onRefresh }) {
           rounds: autoRounds
         })
       })
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
-      }
       const data = await response.json()
       if (data.success) {
         await fetchConversation()
-      } else {
-        console.error('API Error starting auto conversation:', data.message || 'Unknown error')
       }
     } catch (error) {
       console.error('Error starting auto conversation:', error)
