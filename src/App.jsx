@@ -134,7 +134,8 @@ function App() {
   const [loading, setLoading] = useState(true)
 
   // API base URL: ora usa la variabile d'ambiente per il dominio cross-origin
-  const API_BASE = import.meta.env.VITE_APP_BACKEND_URL;
+  const API_BASE = "https://ai-backend-p4jt.onrender.com/api"; // Assicurati che questo sia l'URL corretto del tuo backend
+;
 
   // Funzioni per il fetching dei dati
   const fetchProviders = async () => {
