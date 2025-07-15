@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button.jsx'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card.jsx'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs.jsx'
 import { Badge } from '@/components/ui/badge.jsx'
-import { Separator } from '@/components/ui/separator.jsx'
+import { Separator } from '@/components/ui/separator.jsx' // Importato ma non usato, puoi rimuoverlo se non serve
 import { MessageCircle, Bot, Settings, Plus, Play, Users } from 'lucide-react'
 import './App.css'
 
@@ -12,47 +12,9 @@ import ProvidersManager from './components/ProvidersManager'
 import PersonalitiesManager from './components/PersonalitiesManager'
 import ConversationViewer from './components/ConversationViewer'
 import ConversationsList from './components/ConversationsList'
+import NewConversationForm from './components/NewConversationForm' // Presumo sia un componente separato, altrimenti deve essere interno o definito qui sopra
 
 function App() {
-  const [personalities, setPersonalities] = useState([]);
-  const [providers, setProviders] = useState([]);
-
-  const BACKEND_URL = import.meta.env.VITE_APP_BACKEND_URL;
-
-  useEffect(() => {
-    if (!BACKEND_URL) {
-      console.error("VITE_APP_BACKEND_URL is not defined. Please check your .env file.");
-      return;
-    }
-    fetchPersonalities();
-    fetchProviders();
-  }, [BACKEND_URL]);
-
-  const fetchPersonalities = async () => {
-    try {
-      const response = await fetch(`${BACKEND_URL}/api/personalities`);
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      const data = await response.json();
-      setPersonalities(data);
-    } catch (error) {
-      console.error("Error fetching personalities:", error);
-    }
-  };
-
-  const fetchProviders = async () => {
-    try {
-      const response = await fetch(`${BACKEND_URL}/api/providers`);
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      const data = await response.json();
-      setProviders(data);
-    } catch (error) {
-      console.error("Error fetching providers:", error);
-    }
-  };
   const [activeTab, setActiveTab] = useState('conversations')
   const [providers, setProviders] = useState([])
   const [personalities, setPersonalities] = useState([])
@@ -61,21 +23,24 @@ function App() {
   const [loading, setLoading] = useState(true)
 
   // API base URL
-  const API_BASE = '/api'
+  // Se le API sono sulla stessa origine del frontend, '/api' è corretto.
+  // Se sono su un dominio diverso, dovresti usare process.env.VITE_APP_BACKEND_URL
+  const API_BASE = import.meta.env.VITE_APP_BACKEND_URL;
 
-  // Fetch initial data
-  useEffect(() => {
-    fetchProviders()
-    fetchPersonalities()
-    fetchConversations()
-  }, [])
-
+  // Funzioni per il fetching dei dati
   const fetchProviders = async () => {
     try {
       const response = await fetch(`${API_BASE}/providers`)
+      if (!response.ok) { // Controllo dell'errore HTTP
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
       const data = await response.json()
+      // Assumo che la risposta contenga un campo 'success' e 'providers'.
+      // Se la tua API restituisce direttamente l'array, puoi semplificare.
       if (data.success) {
         setProviders(data.providers)
+      } else {
+        console.error('API Error fetching providers:', data.message || 'Unknown error');
       }
     } catch (error) {
       console.error('Error fetching providers:', error)
@@ -85,9 +50,14 @@ function App() {
   const fetchPersonalities = async () => {
     try {
       const response = await fetch(`${API_BASE}/personalities`)
+      if (!response.ok) { // Controllo dell'errore HTTP
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
       const data = await response.json()
       if (data.success) {
         setPersonalities(data.personalities)
+      } else {
+        console.error('API Error fetching personalities:', data.message || 'Unknown error');
       }
     } catch (error) {
       console.error('Error fetching personalities:', error)
@@ -97,9 +67,14 @@ function App() {
   const fetchConversations = async () => {
     try {
       const response = await fetch(`${API_BASE}/conversations`)
+      if (!response.ok) { // Controllo dell'errore HTTP
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
       const data = await response.json()
       if (data.success) {
         setConversations(data.conversations)
+      } else {
+        console.error('API Error fetching conversations:', data.message || 'Unknown error');
       }
       setLoading(false)
     } catch (error) {
@@ -107,6 +82,16 @@ function App() {
       setLoading(false)
     }
   }
+
+  // Fetch initial data
+  useEffect(() => {
+    // Il primo useEffect che controllava BACKEND_URL è stato rimosso
+    // in favore di un singolo useEffect che carica tutti i dati iniziali.
+    // Assicurati che API_BASE sia configurato correttamente per la tua applicazione.
+    fetchProviders()
+    fetchPersonalities()
+    fetchConversations()
+  }, []) // Dipendenze vuote per eseguire una sola volta al mount
 
   const createNewConversation = async (title, topic, participantIds) => {
     try {
@@ -122,11 +107,16 @@ function App() {
         })
       })
       const data = await response.json()
+      if (!response.ok) { // Controllo dell'errore HTTP anche qui
+        throw new Error(`HTTP error! status: ${response.status}, message: ${data.message || 'Unknown error'}`);
+      }
       if (data.success) {
-        await fetchConversations()
-        setSelectedConversation(data.conversation.id)
-        setActiveTab('conversations')
+        await fetchConversations() // Aggiorna la lista delle conversazioni dopo la creazione
+        setSelectedConversation(data.conversation.id) // Seleziona la nuova conversazione
+        setActiveTab('conversations') // Torna al tab delle conversazioni
         return data.conversation
+      } else {
+        console.error('API Error creating conversation:', data.message || 'Unknown error');
       }
     } catch (error) {
       console.error('Error creating conversation:', error)
@@ -269,7 +259,7 @@ function App() {
   )
 }
 
-// New Conversation Form Component
+// New Conversation Form Component (rimasto uguale, assicurati sia nello stesso file o importato)
 function NewConversationForm({ personalities, onCreateConversation }) {
   const [title, setTitle] = useState('')
   const [topic, setTopic] = useState('')
@@ -299,8 +289,9 @@ function NewConversationForm({ personalities, onCreateConversation }) {
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div>
-        <label className="block text-sm font-medium mb-2">Titolo Conversazione</label>
+        <label htmlFor="conversation-title" className="block text-sm font-medium mb-2">Titolo Conversazione</label>
         <input
+          id="conversation-title"
           type="text"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
@@ -311,8 +302,9 @@ function NewConversationForm({ personalities, onCreateConversation }) {
       </div>
 
       <div>
-        <label className="block text-sm font-medium mb-2">Argomento (opzionale)</label>
+        <label htmlFor="conversation-topic" className="block text-sm font-medium mb-2">Argomento (opzionale)</label>
         <textarea
+          id="conversation-topic"
           value={topic}
           onChange={(e) => setTopic(e.target.value)}
           placeholder="Descrivi l'argomento della conversazione..."
@@ -377,5 +369,5 @@ function NewConversationForm({ personalities, onCreateConversation }) {
   )
 }
 
-export default App
 
+export default App
