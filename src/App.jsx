@@ -14,6 +14,45 @@ import ConversationViewer from './components/ConversationViewer'
 import ConversationsList from './components/ConversationsList'
 
 function App() {
+  const [personalities, setPersonalities] = useState([]);
+  const [providers, setProviders] = useState([]);
+
+  const BACKEND_URL = import.meta.env.VITE_APP_BACKEND_URL;
+
+  useEffect(() => {
+    if (!BACKEND_URL) {
+      console.error("VITE_APP_BACKEND_URL is not defined. Please check your .env file.");
+      return;
+    }
+    fetchPersonalities();
+    fetchProviders();
+  }, [BACKEND_URL]);
+
+  const fetchPersonalities = async () => {
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/personalities`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      setPersonalities(data);
+    } catch (error) {
+      console.error("Error fetching personalities:", error);
+    }
+  };
+
+  const fetchProviders = async () => {
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/providers`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      setProviders(data);
+    } catch (error) {
+      console.error("Error fetching providers:", error);
+    }
+  };
   const [activeTab, setActiveTab] = useState('conversations')
   const [providers, setProviders] = useState([])
   const [personalities, setPersonalities] = useState([])
